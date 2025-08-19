@@ -1,0 +1,302 @@
+import pygame
+import sys
+from pygame.locals import *
+
+# Initialize pygame
+pygame.init()
+pygame.font.init()
+
+# Screen setup
+WIDTH, HEIGHT = 1400, 900
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Complete Periodic Table Simulator")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+ELEMENT_COLORS = {
+    # Alkali Metals
+    "H": (255, 200, 200), "Li": (255, 200, 200), "Na": (255, 200, 200),
+    "K": (255, 200, 200), "Rb": (255, 200, 200), "Cs": (255, 200, 200), "Fr": (255, 200, 200),
+    # Alkaline Earth Metals
+    "Be": (255, 230, 200), "Mg": (255, 230, 200), "Ca": (255, 230, 200),
+    "Sr": (255, 230, 200), "Ba": (255, 230, 200), "Ra": (255, 230, 200),
+    # Transition Metals
+    "Sc": (255, 255, 200), "Ti": (255, 255, 200), "V": (255, 255, 200),
+    "Cr": (255, 255, 200), "Mn": (255, 255, 200), "Fe": (255, 255, 200),
+    "Co": (255, 255, 200), "Ni": (255, 255, 200), "Cu": (255, 255, 200),
+    "Zn": (255, 255, 200), "Y": (255, 255, 200), "Zr": (255, 255, 200),
+    "Nb": (255, 255, 200), "Mo": (255, 255, 200), "Tc": (255, 255, 200),
+    "Ru": (255, 255, 200), "Rh": (255, 255, 200), "Pd": (255, 255, 200),
+    "Ag": (255, 255, 200), "Cd": (255, 255, 200), "Hf": (255, 255, 200),
+    "Ta": (255, 255, 200), "W": (255, 255, 200), "Re": (255, 255, 200),
+    "Os": (255, 255, 200), "Ir": (255, 255, 200), "Pt": (255, 255, 200),
+    "Au": (255, 255, 200), "Hg": (255, 255, 200), "Rf": (255, 255, 200),
+    "Db": (255, 255, 200), "Sg": (255, 255, 200), "Bh": (255, 255, 200),
+    "Hs": (255, 255, 200), "Mt": (255, 255, 200), "Ds": (255, 255, 200),
+    "Rg": (255, 255, 200), "Cn": (255, 255, 200),
+    # Post-Transition Metals
+    "Al": (200, 255, 200), "Ga": (200, 255, 200), "In": (200, 255, 200),
+    "Sn": (200, 255, 200), "Tl": (200, 255, 200), "Pb": (200, 255, 200),
+    "Bi": (200, 255, 200), "Nh": (200, 255, 200), "Fl": (200, 255, 200),
+    "Mc": (200, 255, 200), "Lv": (200, 255, 200),
+    # Metalloids
+    "B": (200, 230, 200), "Si": (200, 230, 200), "Ge": (200, 230, 200),
+    "As": (200, 230, 200), "Sb": (200, 230, 200), "Te": (200, 230, 200),
+    "Po": (200, 230, 200),
+    # Nonmetals
+    "C": (200, 200, 255), "N": (200, 200, 255), "O": (200, 200, 255),
+    "P": (200, 200, 255), "S": (200, 200, 255), "Se": (200, 200, 255),
+    # Halogens
+    "F": (150, 255, 255), "Cl": (150, 255, 255), "Br": (150, 255, 255),
+    "I": (150, 255, 255), "At": (150, 255, 255), "Ts": (150, 255, 255),
+    # Noble Gases
+    "He": (255, 200, 255), "Ne": (255, 200, 255), "Ar": (255, 200, 255),
+    "Kr": (255, 200, 255), "Xe": (255, 200, 255), "Rn": (255, 200, 255), "Og": (255, 200, 255),
+    # Lanthanides
+    "La": (255, 230, 230), "Ce": (255, 230, 230), "Pr": (255, 230, 230),
+    "Nd": (255, 230, 230), "Pm": (255, 230, 230), "Sm": (255, 230, 230),
+    "Eu": (255, 230, 230), "Gd": (255, 230, 230), "Tb": (255, 230, 230),
+    "Dy": (255, 230, 230), "Ho": (255, 230, 230), "Er": (255, 230, 230),
+    "Tm": (255, 230, 230), "Yb": (255, 230, 230), "Lu": (255, 230, 230),
+    # Actinides
+    "Ac": (230, 230, 255), "Th": (230, 230, 255), "Pa": (230, 230, 255),
+    "U": (230, 230, 255), "Np": (230, 230, 255), "Pu": (230, 230, 255),
+    "Am": (230, 230, 255), "Cm": (230, 230, 255), "Bk": (230, 230, 255),
+    "Cf": (230, 230, 255), "Es": (230, 230, 255), "Fm": (230, 230, 255),
+    "Md": (230, 230, 255), "No": (230, 230, 255), "Lr": (230, 230, 255)
+}
+
+# Fonts
+try:
+    element_font = pygame.font.Font("charlie-font.ttf", 24)
+    small_font = pygame.font.Font("charlie-font.ttf", 14)
+except:
+    element_font = pygame.font.SysFont("Arial", 24)
+    small_font = pygame.font.SysFont("Arial", 14)
+    print("Charlie font not found, using Arial instead")
+
+# Complete standard periodic table layout
+PERIODIC_TABLE = [
+    ["H", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "He"],
+    ["Li", "Be", "", "", "", "", "", "", "", "", "", "", "B", "C", "N", "O", "F", "Ne"],
+    ["Na", "Mg", "", "", "", "", "", "", "", "", "", "", "Al", "Si", "P", "S", "Cl", "Ar"],
+    ["K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr"],
+    ["Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe"],
+    ["Cs", "Ba", "La", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn"],
+    ["Fr", "Ra", "Ac", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"],
+    ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+    ["La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "", "", ""],
+    ["Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "", "", ""]
+]
+
+# Generate atomic data for all 118 standard elements
+def generate_atomic_data():
+    data = {}
+    atomic_number = 1
+    
+    # Electron configuration patterns
+    electron_shells = [2, 8, 8, 18, 18, 32, 32]  # Max electrons per shell
+    
+    for row in PERIODIC_TABLE:
+        for element in row:
+            if element and element not in data:
+                # Calculate electron configuration
+                remaining_e = atomic_number
+                electrons = []
+                
+                for shell in electron_shells:
+                    if remaining_e <= 0:
+                        break
+                    electrons.append(min(shell, remaining_e))
+                    remaining_e -= shell
+                
+                data[element] = {
+                    "number": atomic_number,
+                    "electrons": electrons,
+                    "radius": 25 + atomic_number // 10
+                }
+                atomic_number += 1
+                
+                if atomic_number > 118:
+                    break
+        if atomic_number > 118:
+            break
+    
+    return data
+
+atomic_data = generate_atomic_data()
+
+class Atom:
+    def __init__(self, element, x, y):
+        self.element = element
+        self.x = x
+        self.y = y
+        self.data = atomic_data.get(element, {"number": 0, "electrons": [], "radius": 25})
+        self.dragging = False
+        self.offset_x = 0
+        self.offset_y = 0
+    
+    def draw(self, surface):
+        # Draw just the element symbol
+        symbol = element_font.render(self.element, True, BLACK)
+        symbol_rect = symbol.get_rect(center=(int(self.x), int(self.y)))
+        surface.blit(symbol, symbol_rect)
+        
+        # Draw atomic number small below
+        num_text = small_font.render(str(self.data["number"]), True, BLACK)
+        num_rect = num_text.get_rect(center=(int(self.x), int(self.y + 20)))
+        surface.blit(num_text, num_rect)
+    
+    def is_clicked(self, pos):
+        text_width, text_height = element_font.size(self.element)
+        return (self.x - text_width/2 <= pos[0] <= self.x + text_width/2 and 
+                self.y - text_height/2 <= pos[1] <= self.y + text_height/2)
+    
+    def start_drag(self, pos):
+        self.dragging = True
+        self.offset_x = self.x - pos[0]
+        self.offset_y = self.y - pos[1]
+    
+    def drag(self, pos):
+        if self.dragging:
+            self.x = pos[0] + self.offset_x
+            self.y = pos[1] + self.offset_y
+    
+    def stop_drag(self):
+        self.dragging = False
+
+class PeriodicTable:
+    def __init__(self):
+        self.cell_width = 60
+        self.cell_height = 60
+        self.start_x = 50
+        self.start_y = 50
+        self.elements = []
+        self.create_table()
+    
+    def create_table(self):
+        for row_idx, row in enumerate(PERIODIC_TABLE):
+            for col_idx, element in enumerate(row):
+                if element:
+                    x = self.start_x + col_idx * self.cell_width
+                    y = self.start_y + row_idx * self.cell_height
+                    
+                    # Adjust position for lanthanides/actinides
+                    if row_idx >= 7:
+                        x += 2 * self.cell_width
+                        if row_idx == 8:  # Lanthanides
+                            y += 1.5 * self.cell_height
+                        elif row_idx == 9:  # Actinides
+                            y += 2.5 * self.cell_height
+                    
+                    self.elements.append({
+                        "element": element,
+                        "rect": pygame.Rect(x, y, self.cell_width, self.cell_height),
+                        "color": ELEMENT_COLORS.get(element, (220, 220, 220))
+                    })
+    
+    def draw(self, surface):
+        for item in self.elements:
+            element = item["element"]
+            rect = item["rect"]
+            color = item["color"]
+            
+            # Draw cell background
+            pygame.draw.rect(surface, color, rect)
+            pygame.draw.rect(surface, BLACK, rect, 1)
+            
+            # Draw element symbol
+            symbol = element_font.render(element, True, BLACK)
+            symbol_rect = symbol.get_rect(center=rect.center)
+            surface.blit(symbol, symbol_rect)
+            
+            # Draw atomic number
+            if element in atomic_data:
+                num_text = small_font.render(str(atomic_data[element]["number"]), True, BLACK)
+                surface.blit(num_text, (rect.x + 5, rect.y + 5))
+    
+    def get_element_at_pos(self, pos):
+        for item in self.elements:
+            if item["rect"].collidepoint(pos):
+                return item["element"]
+        return None
+
+def main():
+    clock = pygame.time.Clock()
+    periodic_table = PeriodicTable()
+    atoms = []
+    selected_atom = None
+    
+    running = True
+    while running:
+        screen.fill(WHITE)
+        
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                running = False
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    running = False
+                elif event.key == K_d and pygame.key.get_mods() & KMOD_CTRL:
+                    if selected_atom in atoms:
+                        atoms.remove(selected_atom)
+                        selected_atom = None
+            
+            elif event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left click
+                    # Check if clicked on an existing atom
+                    clicked_atom = None
+                    for atom in atoms:
+                        if atom.is_clicked(event.pos):
+                            clicked_atom = atom
+                            break
+                    
+                    if clicked_atom:
+                        selected_atom = clicked_atom
+                        clicked_atom.start_drag(event.pos)
+                    else:
+                        # Check if clicked on periodic table
+                        element = periodic_table.get_element_at_pos(event.pos)
+                        if element:
+                            new_atom = Atom(element, event.pos[0], event.pos[1])
+                            atoms.append(new_atom)
+                            selected_atom = new_atom
+                            new_atom.start_drag(event.pos)
+            
+            elif event.type == MOUSEBUTTONUP:
+                if event.button == 1 and selected_atom:
+                    selected_atom.stop_drag()
+            
+            elif event.type == MOUSEMOTION:
+                if selected_atom and selected_atom.dragging:
+                    selected_atom.drag(event.pos)
+        
+        # Draw periodic table
+        periodic_table.draw(screen)
+        
+        # Draw all atoms
+        for atom in atoms:
+            atom.draw(screen)
+        
+        # Draw instructions
+        instructions = [
+            "Complete Periodic Table Simulator",
+            "Click any element in the table to create it",
+            "Drag atoms to move them",
+            "Ctrl+D to delete selected atom",
+            "ESC to quit"
+        ]
+        
+        for i, text in enumerate(instructions):
+            label = small_font.render(text, True, BLACK)
+            screen.blit(label, (20, HEIGHT - 100 + i * 20))
+        
+        pygame.display.flip()
+        clock.tick(60)
+    
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    main()
